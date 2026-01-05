@@ -45,7 +45,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/h2-console/**").permitAll()
+                        .requestMatchers("/auth/**", "/h2-console/**", "/test/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 // Enable OAuth2 Resource Server to check JWTs
