@@ -1,4 +1,4 @@
-package util;
+package com.demo.playground.util;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +55,13 @@ public class StreamPractice {
            5
         */
 
+        System.out.println("Trying to solve first problem");
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+        numbers.stream().forEach(System.out::println);
+
+
+
+
         /*
            2. Filter out the even numbers from a list of integers and print them.
            Sample Input: Arrays.asList(1, 2, 3, 4, 5, 6)
@@ -67,6 +74,9 @@ public class StreamPractice {
            Expected Output: 15
         */
 
+        List<Integer> num1 = Arrays.asList(1, 2, 3, 4, 5);
+        Integer sum = num1.stream().reduce((a, b) -> a + b).get();
+        System.out.println("Sum " + sum);
         /*
            4. Find the maximum element in a list of integers.
            Sample Input: Arrays.asList(1, 5, 3, 9, 2)
@@ -486,6 +496,7 @@ public class StreamPractice {
            Sample Input: Arrays.asList(1, 9, 3, 10, 4, 20, 2)
            Expected Output: 4 (for sequence 1, 2, 3, 4)
         */
+
 
         /*
            74. Group a list of strings by their length and count the number of strings in each group.
