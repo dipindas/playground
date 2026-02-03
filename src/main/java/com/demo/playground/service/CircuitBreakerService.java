@@ -4,7 +4,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Service to demonstrate Circuit Breaker implementation using Resilience4j.
@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class CircuitBreakerService {
 
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
 
     // The URL of the target API we are calling.
     // In a real microservice architecture, this would be the URL of another service.
@@ -40,8 +40,13 @@ public class CircuitBreakerService {
     @CircuitBreaker(name = "backendA", fallbackMethod = "fallback")
     public String callTargetApi(boolean fail) {
         String url = targetUrl + "?fail=" + fail;
-        // Making a synchronous HTTP call
-        return restTemplate.getForObject(url, String.class);
+        // Making a blocking HTTP call using WebClient
+        return webClientBuilder.build()
+                .get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
     }
 
     /**
