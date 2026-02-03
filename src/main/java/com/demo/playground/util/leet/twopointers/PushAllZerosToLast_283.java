@@ -1,4 +1,4 @@
-package com.demo.playground.util.leet;
+package com.demo.playground.util.leet.twopointers;
 
 import java.util.Arrays;
 
