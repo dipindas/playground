@@ -1,4 +1,4 @@
-package com.demo.playground.util.leet;
+package com.demo.playground.util.leet.stack;
 
 import java.util.Arrays;
 import java.util.Stack;
