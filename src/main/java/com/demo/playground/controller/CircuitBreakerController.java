@@ -4,6 +4,7 @@ import com.demo.playground.service.CircuitBreakerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +39,7 @@ public class CircuitBreakerController {
      * @param fail If true, simulates a server error (500).
      * @return Success message or throws exception.
      */
-    @GetMapping("/target")
+    @PostMapping("/target")
     public ResponseEntity<String> target(@RequestParam(defaultValue = "false") boolean fail) {
         if (fail) {
             // Throwing RuntimeException will result in a 500 Internal Server Error by default in Spring Boot

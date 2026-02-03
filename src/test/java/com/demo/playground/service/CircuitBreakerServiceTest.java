@@ -25,15 +25,15 @@ public class CircuitBreakerServiceTest {
     @Autowired
     private CircuitBreakerService circuitBreakerService;
 
-    // Use MockitoBean for creating mocks in Spring Boot test context (Spring Boot 3.4+)
     @MockitoBean
     private WebClient.Builder webClientBuilder;
 
     @MockitoBean
     private WebClient webClient;
 
+    // For POST, WebClient returns RequestBodyUriSpec
     @MockitoBean
-    private WebClient.RequestHeadersUriSpec requestHeadersUriSpec;
+    private WebClient.RequestBodyUriSpec requestBodyUriSpec;
 
     @MockitoBean
     private WebClient.RequestHeadersSpec requestHeadersSpec;
@@ -50,11 +50,11 @@ public class CircuitBreakerServiceTest {
         CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("backendA");
         circuitBreaker.reset();
 
-        // Setup WebClient mock chain
+        // Setup WebClient mock chain for POST
         when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(webClient.post()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
     }
 
     @Test
@@ -122,6 +122,8 @@ public class CircuitBreakerServiceTest {
         circuitBreakerService.callTargetApi(true);
 
         // Call 3: Success (Just to complete the permitted calls if needed)
+        // Note: Even if we mock success here, the failure rate is already 66% (2/3) which is > 50%
+        // We need to consume the 3rd permitted call for the decision to be made
         when(responseSpec.bodyToMono(eq(String.class))).thenReturn(Mono.just("Success"));
         circuitBreakerService.callTargetApi(false);
 

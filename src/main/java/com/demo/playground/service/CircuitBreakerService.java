@@ -42,7 +42,7 @@ public class CircuitBreakerService {
         String url = targetUrl + "?fail=" + fail;
         // Making a blocking HTTP call using WebClient
         return webClientBuilder.build()
-                .get()
+                .post()
                 .uri(url)
                 .retrieve()
                 .bodyToMono(String.class)
