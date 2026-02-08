@@ -28,7 +28,7 @@ public class NextGreaterElement {
 //        return result;
 //    }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) { // 4 3 2 1 5
         int[] input = {2, 4, 1, 3, 5};
         int[] output = findNextGreater(input);
 

@@ -1,4 +1,4 @@
-package com.demo.playground.util.leet;
+package com.demo.playground.util.leet.prefixsum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,7 @@ public class SubArraySum_560 {
 
     public static void main(String args[]) {
         int[] arr = {1, 4, 6, 2, 1, 3, 2};
+                   //1, 5, 11, 13, 14, 17, 19
         int target = 5;
         int result = findSum(arr, target);
         System.out.println("Result: " + result);
