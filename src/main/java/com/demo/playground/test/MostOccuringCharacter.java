@@ -39,5 +39,11 @@ public class MostOccuringCharacter {
             }
         }
         System.out.println("Most occuring word " + String.valueOf(result));
+
+
+        Map<Character, Long> charMap = name.chars().parallel().mapToObj(x -> (char)x)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        System.out.println("Frequency count using parallel" + charMap);
+
     }
 }
