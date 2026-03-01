@@ -14,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 public class CircuitBreakerService {
 
-    private final WebClient.Builder webClientBuilder;
+    private final WebClient webClient;
 
     // The URL of the target API we are calling.
     // In a real microservice architecture, this would be the URL of another service.
@@ -41,7 +41,7 @@ public class CircuitBreakerService {
     public String callTargetApi(boolean fail) {
         String url = targetUrl + "?fail=" + fail;
         // Making a blocking HTTP call using WebClient
-        return webClientBuilder.build()
+        return webClient
                 .post()
                 .uri(url)
                 .retrieve()

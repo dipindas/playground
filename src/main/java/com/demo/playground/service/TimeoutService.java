@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class TimeoutService {
 
-    private final WebClient.Builder webClientBuilder;
+    private final WebClient webClient;
 
     @Value("${timeout.target.url:http://localhost:8080/test/timeout/target}")
     private String targetUrl;
@@ -34,7 +34,7 @@ public class TimeoutService {
 
         log.info("Calling {} with WebClient timeout configured to {} ms", url, timeoutMs);
 
-        return webClientBuilder.build()
+        return webClient
                 .post()
                 .uri(url)
                 .retrieve()

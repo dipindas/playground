@@ -26,9 +26,6 @@ public class CircuitBreakerServiceTest {
     private CircuitBreakerService circuitBreakerService;
 
     @MockitoBean
-    private WebClient.Builder webClientBuilder;
-
-    @MockitoBean
     private WebClient webClient;
 
     // For POST, WebClient returns RequestBodyUriSpec
@@ -51,7 +48,6 @@ public class CircuitBreakerServiceTest {
         circuitBreaker.reset();
 
         // Setup WebClient mock chain for POST
-        when(webClientBuilder.build()).thenReturn(webClient);
         when(webClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
@@ -64,7 +60,7 @@ public class CircuitBreakerServiceTest {
         String response = circuitBreakerService.callTargetApi(false);
 
         assertEquals("Success", response);
-        verify(webClientBuilder, times(1)).build();
+        verify(webClient, times(1)).post();
     }
 
     @Test
@@ -96,7 +92,7 @@ public class CircuitBreakerServiceTest {
         assertTrue(response.startsWith("Fallback response: Target API is down or unavailable. Error: CircuitBreaker 'backendA' is OPEN"));
 
         // WebClient should have been called 5 times (failures) but not for the 6th call
-        verify(webClientBuilder, times(5)).build();
+        verify(webClient, times(5)).post();
     }
 
     @Test
