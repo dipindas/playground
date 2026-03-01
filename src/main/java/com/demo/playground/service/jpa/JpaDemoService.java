@@ -84,49 +84,25 @@ public class JpaDemoService {
         employeeRepository.save(emp); // Flushes/saves to DB, entity is now managed and in cache.
         sb.append("Saved new Employee with ID: ").append(emp.getId()).append("\n");
 
+        // employeeRepository.findById() delegates to entityManager.find() under the hood
+        // for primary key lookups, so it leverages the First-Level Cache exactly the same way.
+
         // The first find may hit the DB if it wasn't just saved, but since it was just saved,
         // it's already in the persistence context (L1 cache).
         long startTime = System.nanoTime();
-        Employee cachedEmp1 = entityManager.find(Employee.class, emp.getId());
+        Employee cachedEmp1 = employeeRepository.findById(emp.getId()).orElse(null);
         long duration1 = System.nanoTime() - startTime;
         sb.append("1st Find Duration (ns): ").append(duration1).append(" (Hit L1 Cache)\n");
 
         // The second find for the same ID within the SAME transaction will definitely hit the L1 cache.
         // It will NOT trigger a SQL query.
         startTime = System.nanoTime();
-        Employee cachedEmp2 = entityManager.find(Employee.class, emp.getId());
+        Employee cachedEmp2 = employeeRepository.findById(emp.getId()).orElse(null);
         long duration2 = System.nanoTime() - startTime;
         sb.append("2nd Find Duration (ns): ").append(duration2).append(" (Hit L1 Cache - Notice it's faster and no SQL logs appear)\n");
 
         // Prove they are the exact same object reference
         sb.append("Are cachedEmp1 and cachedEmp2 the exact same object instance? ").append(cachedEmp1 == cachedEmp2).append("\n");
-
-        return sb.toString();
-    }
-
-    /**
-     * Demonstrates Dirty Checking mechanism.
-     */
-    @Transactional
-    public String demonstrateDirtyChecking() {
-        StringBuilder sb = new StringBuilder();
-
-        // Save a new entity
-        Employee emp = new Employee("Dirty Check Initial");
-        employeeRepository.saveAndFlush(emp);
-        sb.append("Saved Initial Employee: ").append(emp.getName()).append("\n");
-
-        // Fetch it (now it's managed)
-        Employee managedEmp = employeeRepository.findById(emp.getId()).orElseThrow();
-        sb.append("Fetched Managed Employee: ").append(managedEmp.getName()).append("\n");
-
-        // Modify the managed entity
-        managedEmp.setName("Dirty Check Modified");
-        sb.append("Modified entity in memory to: '").append(managedEmp.getName()).append("'. Did NOT call save().\n");
-
-        // When the @Transactional method finishes, JPA detects the change ("Dirty Checking")
-        // and automatically issues an UPDATE statement to the database.
-        sb.append("JPA will automatically execute an UPDATE statement upon transaction commit.\n");
 
         return sb.toString();
     }

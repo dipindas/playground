@@ -24,11 +24,6 @@ public class JpaDemoController {
         return ResponseEntity.ok(jpaDemoService.demonstrateFirstLevelCache());
     }
 
-    @GetMapping("/dirty-checking")
-    public ResponseEntity<String> testDirtyChecking() {
-        return ResponseEntity.ok(jpaDemoService.demonstrateDirtyChecking());
-    }
-
     @GetMapping("/mappings")
     public ResponseEntity<String> testMappings() {
         return ResponseEntity.ok(jpaDemoService.demonstrateMappings());
