@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class RetryService {
 
-    private final WebClient.Builder webClientBuilder;
+    private final WebClient webClient;
 
     @Value("${retry.target.url:http://localhost:8080/test/retry/target}")
     private String targetUrl;
@@ -27,7 +27,7 @@ public class RetryService {
     public String callTargetApi(boolean fail) {
         System.out.println("RetryService.callTargetApi called at " + LocalDateTime.now());
         String url = targetUrl + "?fail=" + fail;
-        return webClientBuilder.build()
+        return webClient
                 .post()
                 .uri(url)
                 .retrieve()
