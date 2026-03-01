@@ -10,7 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 public class BulkheadService {
 
-    private final WebClient.Builder webClientBuilder;
+    private final WebClient webClient;
 
     @Value("${bulkhead.target.url:http://localhost:8080/test/bulkhead/target}")
     private String targetUrl;
@@ -22,7 +22,7 @@ public class BulkheadService {
      */
     @Bulkhead(name = "bulkheadApi", fallbackMethod = "fallback")
     public String callTargetApi() {
-        return webClientBuilder.build()
+        return webClient
                 .post()
                 .uri(targetUrl)
                 .retrieve()
