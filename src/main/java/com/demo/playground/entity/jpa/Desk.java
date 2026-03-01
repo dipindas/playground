@@ -6,21 +6,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "jpa_address")
+@Table(name = "jpa_desk")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Address {
+public class Desk {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String street;
-    private String city;
+    private String locationCode;
 
-    public Address(String street, String city) {
-        this.street = street;
-        this.city = city;
+    public Desk(String locationCode) {
+        this.locationCode = locationCode;
     }
 }

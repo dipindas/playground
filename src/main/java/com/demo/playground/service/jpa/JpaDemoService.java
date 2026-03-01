@@ -8,6 +8,7 @@ import com.demo.playground.entity.jpa.Car;
 import com.demo.playground.entity.jpa.Cat;
 import com.demo.playground.entity.jpa.CreditCardPayment;
 import com.demo.playground.entity.jpa.Department;
+import com.demo.playground.entity.jpa.Desk;
 import com.demo.playground.entity.jpa.Dog;
 import com.demo.playground.entity.jpa.Employee;
 import com.demo.playground.entity.jpa.Payment;
@@ -113,33 +114,49 @@ public class JpaDemoService {
     }
 
     /**
-     * Demonstrates Mappings: OneToOne, OneToMany, ManyToMany.
+     * Demonstrates Mappings: OneToOne, OneToMany, ManyToOne, ManyToMany.
      */
     @Transactional
     public String demonstrateMappings() {
         StringBuilder sb = new StringBuilder();
 
-        // --- OneToOne ---
+        // --- Uni-directional OneToOne ---
+        // Employee has an Address. Address does not know about Employee.
+        // Internally: JPA saves Address first, then saves Employee with Address ID in `address_id` column.
         Employee emp = new Employee("Mapping Demo User");
         Address address = new Address("123 Main St", "Tech City");
-        emp.setAddress(address); // Cascade.ALL will save the address when we save the employee
-        sb.append("Assigned OneToOne Address to Employee.\n");
+        emp.setAddress(address); // Cascade.ALL handles saving Address.
+        employeeRepository.save(emp);
+        sb.append("Created Employee with Uni-directional OneToOne Address.\n");
 
-        // --- ManyToOne / OneToMany ---
+        // --- Uni-directional OneToMany ---
+        // Department has a List of Desks. Desk does not know about Department.
+        // Internally: Because we specified @JoinColumn(name="department_id") on the Department's List<Desk>,
+        // JPA will insert the Desks, then execute an UPDATE statement to set `department_id` on the Desks.
         Department dept = new Department("Engineering");
-        // Using the helper method to keep both sides of the bi-directional relationship in sync
-        dept.addEmployee(emp);
-        departmentRepository.save(dept); // Cascade.ALL will save the employee (and their address)
-        sb.append("Created Department and added Employee (OneToMany / ManyToOne).\n");
+        dept.addDesk(new Desk("Desk-A1"));
+        dept.addDesk(new Desk("Desk-A2"));
+        departmentRepository.save(dept); // Cascade.ALL handles saving Desks.
+        sb.append("Created Department with Uni-directional OneToMany Desks.\n");
 
-        // --- ManyToMany ---
+        // --- Uni-directional ManyToOne ---
+        // A new Employee is assigned to a Department. The Department does not keep a List of Employees.
+        // Internally: JPA saves the Employee and sets the `department_id` column in the Employee table.
+        Employee emp2 = new Employee("Second User");
+        emp2.setDepartment(dept);
+        employeeRepository.save(emp2);
+        sb.append("Created second Employee with Uni-directional ManyToOne reference to Department.\n");
+
+        // --- Bi-directional ManyToMany ---
+        // Employee and Project know about each other. Employee is the owner (defines @JoinTable).
+        // Internally: JPA creates a junction table (`jpa_employee_project`) to store the relationships.
+        // Since Employee is the owner, we must persist the Employee to save the relationship.
         Project p1 = new Project("Project Alpha");
         Project p2 = new Project("Project Beta");
         emp.addProject(p1);
         emp.addProject(p2);
-        // We persist the employee because employee holds the @JoinTable and CascadeType.PERSIST
         employeeRepository.save(emp);
-        sb.append("Assigned Employee to two Projects (ManyToMany).\n");
+        sb.append("Assigned first Employee to two Projects via Bi-directional ManyToMany.\n");
 
         return sb.toString();
     }
