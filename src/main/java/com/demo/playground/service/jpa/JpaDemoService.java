@@ -163,12 +163,17 @@ public class JpaDemoService {
 
     /**
      * Demonstrates Inheritance (SINGLE_TABLE, JOINED, and TABLE_PER_CLASS strategies).
+     * This method shows how JPA maps Object-Oriented inheritance onto Relational tables.
      */
     @Transactional
     public String demonstrateInheritance() {
         StringBuilder sb = new StringBuilder();
 
-        // 1. SINGLE_TABLE
+        // 1. SINGLE_TABLE Strategy (Default)
+        // What it does: Maps all classes in the hierarchy (Vehicle, Car, Bike) to a single database table (jpa_vehicle).
+        // Pros: Best performance because there are no JOINs required to query subclasses.
+        // Cons: Subclass-specific columns (e.g., number_of_doors, has_sidecar) must be nullable, wasting space.
+        // Mechanism: Uses a @DiscriminatorColumn (e.g., 'vehicle_type' = 'CAR' or 'BIKE') to tell JPA which subclass a row belongs to.
         Car car = new Car("Toyota", 4);
         Bike bike = new Bike("Harley Davidson", false);
         vehicleRepository.save(car);
@@ -179,12 +184,16 @@ public class JpaDemoService {
         sb.append("Saved Bike (Manufacturer: ").append(bike.getManufacturer()).append(", Has Sidecar: ").append(bike.isHasSidecar()).append(")\n");
 
         List<Vehicle> vehicles = vehicleRepository.findAll();
-        sb.append("Retrieved Vehicles:\n");
+        sb.append("Retrieved Vehicles (Notice: queries just one table 'jpa_vehicle'):\n");
         for (Vehicle v : vehicles) {
             sb.append("- ").append(v.getClass().getSimpleName()).append(": ").append(v.getManufacturer()).append("\n");
         }
 
-        // 2. JOINED
+        // 2. JOINED Strategy
+        // What it does: Creates a separate table for each class in the hierarchy (jpa_animal, jpa_dog, jpa_cat).
+        // Pros: Data is normalized. Subclass tables only contain their specific columns, so no nulls.
+        // Cons: Slower performance because fetching a subclass requires a SQL JOIN between the parent table and subclass table.
+        // Mechanism: The subclass tables (jpa_dog) have a foreign key pointing back to the primary key of the parent table (jpa_animal).
         Dog dog = new Dog("Canine", "Golden Retriever");
         Cat cat = new Cat("Feline", true);
         animalRepository.save(dog);
@@ -195,12 +204,16 @@ public class JpaDemoService {
         sb.append("Saved Cat (Species: ").append(cat.getSpecies()).append(", Indoor: ").append(cat.isIndoor()).append(")\n");
 
         List<Animal> animals = animalRepository.findAll();
-        sb.append("Retrieved Animals:\n");
+        sb.append("Retrieved Animals (Notice: executes SQL JOINs across jpa_animal, jpa_dog, and jpa_cat):\n");
         for (Animal a : animals) {
             sb.append("- ").append(a.getClass().getSimpleName()).append(": ").append(a.getSpecies()).append("\n");
         }
 
-        // 3. TABLE_PER_CLASS
+        // 3. TABLE_PER_CLASS Strategy
+        // What it does: Creates a separate table ONLY for the concrete subclasses (jpa_credit_card_payment, jpa_bank_transfer_payment). The parent class (Payment) does not get a table.
+        // Pros: No JOINs are needed when querying a specific subclass table.
+        // Cons: Polymorphic queries (e.g., querying the base PaymentRepository) are very slow because they require complex SQL UNIONs across all subclass tables.
+        // Mechanism: Parent class fields (amount, id) are duplicated into every subclass table.
         CreditCardPayment ccPayment = new CreditCardPayment(100.50, "1234-5678-9012-3456");
         BankTransferPayment btPayment = new BankTransferPayment(500.00, "IBAN987654321");
         paymentRepository.save(ccPayment);
@@ -211,7 +224,7 @@ public class JpaDemoService {
         sb.append("Saved Bank Transfer Payment (Amount: ").append(btPayment.getAmount()).append(", Account: ").append(btPayment.getBankAccountId()).append(")\n");
 
         List<Payment> payments = paymentRepository.findAll();
-        sb.append("Retrieved Payments:\n");
+        sb.append("Retrieved Payments (Notice: executes a SQL UNION to combine results from all tables):\n");
         for (Payment p : payments) {
             sb.append("- ").append(p.getClass().getSimpleName()).append(": ").append(p.getAmount()).append("\n");
         }
