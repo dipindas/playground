@@ -54,7 +54,10 @@ public class JpaDemoService {
         employeeRepository.save(emp);
         sb.append("Saved Employee with ID: ").append(emp.getId()).append(" (State: Managed)\n");
 
-        // 3. Detached State (Detached from the persistence context manually)
+        // 3. Detached State
+        // Spring Data JPA doesn't expose a detach() method directly because it abstracts away
+        // the EntityManager. However, we can use entityManager.clear() to clear the entire context,
+        // or just keep using entityManager.detach(emp) for this specific entity.
         entityManager.detach(emp);
         sb.append("Detached Employee from EntityManager (State: Detached)\n");
 
@@ -62,13 +65,15 @@ public class JpaDemoService {
         emp.setName("John Detached");
         sb.append("Changed name of Detached Employee to: ").append(emp.getName()).append(". This will NOT be saved to DB.\n");
 
-        // Merge back to Managed state (re-attach)
-        Employee managedEmp = entityManager.merge(emp);
-        sb.append("Merged Employee back. (State: Managed). Name is now: ").append(managedEmp.getName()).append("\n");
+        // Merge back to Managed state (re-attach).
+        // In Spring Data JPA, save() on an existing entity acts as merge() under the hood.
+        Employee managedEmp = employeeRepository.save(emp);
+        sb.append("Merged Employee back via employeeRepository.save(). (State: Managed). Name is now: ").append(managedEmp.getName()).append("\n");
 
         // 4. Removed State
-        entityManager.remove(managedEmp);
-        sb.append("Removed Employee from DB (State: Removed)\n");
+        // In Spring Data JPA, delete() acts as remove() under the hood.
+        employeeRepository.delete(managedEmp);
+        sb.append("Removed Employee from DB via employeeRepository.delete() (State: Removed)\n");
 
         return sb.toString();
     }
