@@ -27,20 +27,20 @@ public class Employee {
     // When Employee is saved, Address is cascaded (CascadeType.ALL) and saved first,
     // then its ID is stored in the Employee table.
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    @JoinColumn(name = "address_id", referencedColumnName = "id") // referencedColumnName is optional, which is the primary key in Address table.
     private Address address;
 
     // Uni-directional ManyToOne. Employee is the "owner" (holds the foreign key).
     // The target entity (Department) has no List<Employee> pointing back here.
     // Internally: The `jpa_employee` table will have a `department_id` column.
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY) // CascadeType.ALL is generally not recommended for ManyToOne relationships, as it can lead to unintended deletions.
     @JoinColumn(name = "department_id")
     private Department department;
 
     // Bi-directional ManyToMany. Employee is the "owner" of the relationship
     // because it defines the @JoinTable.
     // Internally: JPA creates a junction/join table named `jpa_employee_project`.
-    // It has two foreign keys: `employee_id` and `project_id`.
+    // It has two foreign keys: `employee_id` and `project_id`. The `referencedColumnName` is optional, which is the primary key in the respective tables.
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "jpa_employee_project",
