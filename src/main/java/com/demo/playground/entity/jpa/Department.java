@@ -21,15 +21,15 @@ public class Department {
 
     private String name;
 
-    // Uni-directional OneToMany. Department is the owner because there is no @ManyToOne
-    // on the Desk side back to Department.
-    // Internally: JPA creates a separate join table (e.g., `jpa_department_jpa_desk`)
-    // or uses a foreign key in the `jpa_desk` table if @JoinColumn is explicitly specified.
-    // Here we specify @JoinColumn to force a foreign key in the `jpa_desk` table
-    // rather than creating a whole join table just for a OneToMany relationship.
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "department_id")
+    // Bi-directional OneToMany. Desk is the owner (has @ManyToOne).
+    // The "mappedBy" attribute means Department is the inverse (non-owning) side.
+    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Desk> desks = new ArrayList<>();
+
+    // Bi-directional OneToMany. Employee is the owner (has @ManyToOne).
+    // The "mappedBy" attribute means Department is the inverse (non-owning) side.
+    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Employee> employees = new ArrayList<>();
 
     public Department(String name) {
         this.name = name;
@@ -37,9 +37,21 @@ public class Department {
 
     public void addDesk(Desk desk) {
         desks.add(desk);
+        desk.setDepartment(this);
     }
 
     public void removeDesk(Desk desk) {
         desks.remove(desk);
+        desk.setDepartment(null);
+    }
+
+    public void addEmployee(Employee employee) {
+        employees.add(employee);
+        employee.setDepartment(this);
+    }
+
+    public void removeEmployee(Employee employee) {
+        employees.remove(employee);
+        employee.setDepartment(null);
     }
 }

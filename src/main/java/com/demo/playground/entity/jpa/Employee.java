@@ -21,7 +21,7 @@ public class Employee {
 
     private String name;
 
-    // Uni-directional OneToOne. Employee is the "owner" of the relationship
+    // Bi-directional OneToOne. Employee is the "owner" of the relationship
     // because it holds the foreign key (address_id).
     // Internally: JPA creates an `address_id` column in `jpa_employee`.
     // When Employee is saved, Address is cascaded (CascadeType.ALL) and saved first,
@@ -30,8 +30,8 @@ public class Employee {
     @JoinColumn(name = "address_id", referencedColumnName = "id") // referencedColumnName is optional, which is the primary key in Address table.
     private Address address;
 
-    // Uni-directional ManyToOne. Employee is the "owner" (holds the foreign key).
-    // The target entity (Department) has no List<Employee> pointing back here.
+    // Bi-directional ManyToOne. Employee is the "owner" (holds the foreign key).
+    // The target entity (Department) has a List<Employee> pointing back here.
     // Internally: The `jpa_employee` table will have a `department_id` column.
     @ManyToOne(fetch = FetchType.LAZY) // CascadeType.ALL is generally not recommended for ManyToOne relationships, as it can lead to unintended deletions.
     @JoinColumn(name = "department_id")
@@ -51,6 +51,20 @@ public class Employee {
 
     public Employee(String name) {
         this.name = name;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+        if (address != null) {
+            address.setEmployee(this);
+        }
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+        if (department != null && !department.getEmployees().contains(this)) {
+            department.getEmployees().add(this);
+        }
     }
 
     public void addProject(Project project) {
