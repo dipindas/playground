@@ -120,32 +120,33 @@ public class JpaDemoService {
     public String demonstrateMappings() {
         StringBuilder sb = new StringBuilder();
 
-        // --- Uni-directional OneToOne ---
-        // Employee has an Address. Address does not know about Employee.
+        // --- Bi-directional OneToOne ---
+        // Employee is the owner and has an Address. Address has mappedBy="address".
         // Internally: JPA saves Address first, then saves Employee with Address ID in `address_id` column.
         Employee emp = new Employee("Mapping Demo User");
         Address address = new Address("123 Main St", "Tech City");
         emp.setAddress(address); // Cascade.ALL handles saving Address.
         employeeRepository.save(emp);
-        sb.append("Created Employee with Uni-directional OneToOne Address.\n");
+        sb.append("Created Employee with Bi-directional OneToOne Address.\n");
 
-        // --- Uni-directional OneToMany ---
-        // Department has a List of Desks. Desk does not know about Department.
-        // Internally: Because we specified @JoinColumn(name="department_id") on the Department's List<Desk>,
-        // JPA will insert the Desks, then execute an UPDATE statement to set `department_id` on the Desks.
+        // --- Bi-directional OneToMany ---
+        // Department has a List of Desks. Desk is the owner and has @ManyToOne.
+        // Internally: JPA will save the Department, then insert the Desks with `department_id` already populated,
+        // avoiding an extra UPDATE statement.
         Department dept = new Department("Engineering");
         dept.addDesk(new Desk("Desk-A1"));
         dept.addDesk(new Desk("Desk-A2"));
         departmentRepository.save(dept); // Cascade.ALL handles saving Desks.
-        sb.append("Created Department with Uni-directional OneToMany Desks.\n");
+        sb.append("Created Department with Bi-directional OneToMany Desks.\n");
 
-        // --- Uni-directional ManyToOne ---
-        // A new Employee is assigned to a Department. The Department does not keep a List of Employees.
+        // --- Bi-directional ManyToOne ---
+        // Employee is the owner (holds the foreign key). Department has a List<Employee> mappedBy="department".
         // Internally: JPA saves the Employee and sets the `department_id` column in the Employee table.
         Employee emp2 = new Employee("Second User");
         emp2.setDepartment(dept);
         employeeRepository.save(emp2);
-        sb.append("Created second Employee with Uni-directional ManyToOne reference to Department.\n");
+        // Note: In a real app we might want to ensure 'emp2' is added to 'dept.getEmployees()' for L1 cache consistency.
+        sb.append("Created second Employee with Bi-directional ManyToOne reference to Department.\n");
 
         // --- Bi-directional ManyToMany ---
         // Employee and Project know about each other. Employee is the owner (defines @JoinTable).
