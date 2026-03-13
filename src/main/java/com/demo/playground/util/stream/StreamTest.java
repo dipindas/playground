@@ -6,8 +6,53 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.Map.Entry.comparingByValue;
+
 public class StreamTest {
     public static void main(String[] args) {
+        /**
+         *   Arrays.asList(array) -> Should be used for Wrapper arrays
+         *   Arrays.stream(array) -> Should be used for primitive arrays
+         *      Or
+         *   IntStream.of(array) -> Both of these options will be creating IntStream
+         *
+         *
+         */
+
+        /**
+         * Given an integer array. Group these numbers by its first number
+         */
+        int[] arr = {101, 1001, 2000, 200, 303};
+
+        Map<Integer, List<Integer>> result7 = Arrays.stream(arr).boxed().collect(Collectors.groupingBy(
+                x -> {
+                    String str = String.valueOf(x);
+                    Integer val = Integer.parseInt(str.substring(0, 1));
+                    return val;
+                }
+        ));
+        System.out.println(result7);
+
+        /**
+         * If the map has to be sorted by key and values in the list should be sorted by its list size
+         */
+        Map<Integer, List<Integer>> result8 = Arrays.stream(arr).boxed().collect(Collectors.groupingBy(
+                x -> {
+                    String str = String.valueOf(x);
+                    Integer val = Integer.parseInt(str.substring(0, 1));
+                    return val;
+                }, TreeMap::new, Collectors.toList()
+        )).entrySet().stream().sorted(comparingByValue(Comparator.comparingInt(List::size)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldVal, newVal) -> newVal, LinkedHashMap::new));
+        System.out.println(result8);
+
+        /** Approach using normal Map operations only**
+        Map<Integer, List<Integer>> resultMap = new HashMap<>();
+        for(int i : arr) {
+            resultMap.computeIfAbsent(Integer.parseInt(String.valueOf(i).substring(0, 1)), k -> new ArrayList<>()).add(i);
+        }
+        System.out.println(resultMap);
+
 
         /**
          *  Calculate the sum of integers from 1 to 1,000,000 using a parallel stream.
@@ -59,6 +104,42 @@ public class StreamTest {
                 .distinct()
                 .count();
         System.out.println("Distinct word count " + count);
+
+        List<String> sentences1 = Arrays.asList("Java Stream API", "java stream problems");
+        Set<String> unique = sentences1.stream().map(x -> x.split(" "))
+                .flatMap(x -> Arrays.stream(x))
+                .map(x -> x.toLowerCase())
+                .collect(Collectors.toSet());
+        System.out.println("Unique elements " + unique);
+
+        List<String> unique1 = sentences1.stream().map(x -> x.split(" "))
+                .flatMap(x -> Arrays.stream(x))
+                .map(x -> x.toLowerCase())
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+        System.out.println("Unique elements in sorted order " + unique1);
+
+        List<String> unique2 = sentences1.stream().map(x -> x.split(" "))
+                .flatMap(x -> Arrays.stream(x))
+                .map(x -> x.toLowerCase())
+                .distinct()
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toList());
+        System.out.println("Unique elements in sorted in reverse order " + unique2);
+
+        // List<String> sentences = Arrays.asList("Java Stream API", "java stream problems");
+        // order the unique words after converting to lowercase in the decreasing order of their length
+        // sample output -> [problems, stream, java, api]
+        List<String> unique3 = sentences1.stream().map(x -> x.split(" "))
+                .flatMap(x -> Arrays.stream(x))
+                .map(x -> x.toLowerCase())
+                .distinct()
+                .sorted(Comparator.comparing(String::length).reversed())
+                .collect(Collectors.toList());
+        System.out.println("Unique elements storeed in the reverse order of its length " + unique3);
+
+
         System.out.println("================================================");
 
         /**
@@ -129,6 +210,13 @@ public class StreamTest {
                 .collect(Collectors.groupingBy(Employee::getDepartment, Collectors.mapping(Employee::getName, Collectors.toList())));
         empMapWithSort.entrySet().forEach(x -> System.out.println(x.getKey() + " " + x.getValue()));
 
+
+        Map<String, List<String>> sortedValuesMap = empMapWithSort.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream().sorted().collect(Collectors.toList())
+                ));
+        System.out.println("sorted by value " + sortedValuesMap);
         System.out.println("================================================");
 
 
@@ -173,6 +261,27 @@ public class StreamTest {
         System.out.println("Map sorted by salary " + empMapWithSorted1);
         System.out.println("================================================");
 
+        /*
+         * PROBLEM:
+         * Given a list of words ["apple", "banana", "apricot", "blueberry"],
+         * group them by their first letter using stream API.
+         * Result should be: {a=[apple, apricot], b=[banana, blueberry]}
+         */
+        System.out.println("Grouping words by their first character");
+        List<String> words = List.of("apple", "banana", "apricot", "blueberry");
+        Map<String, List<String>> fruitMap2 = words.stream().collect(Collectors.groupingBy(x -> x.substring(0, 1)));
+        System.out.println(fruitMap2);
+        System.out.println("================================================");
+
+        /**
+         * Without using Stream, but using computeIfAbsent()
+         */
+        Map<String, List<String>> fruitMap3 = new HashMap<>();
+        for(String str1 : words) {
+            fruitMap3.computeIfAbsent(str1.substring(0, 1), v -> new ArrayList<>()).add(str1);
+        }
+        System.out.println("fruitMap3 " + fruitMap3);
+
         /**
          * Q1. Program to sort a map by its value
          *
@@ -185,7 +294,7 @@ public class StreamTest {
         studentMap.put("Ken", 20);
 
         System.out.println("Trying out single line solution");
-        studentMap.entrySet().stream().sorted(Map.Entry.comparingByValue())
+        studentMap.entrySet().stream().sorted(comparingByValue())
                 .forEach(System.out::println);
         studentMap.entrySet().stream().sorted(Map.Entry.comparingByKey())
                 .forEach(System.out::println);
@@ -233,6 +342,7 @@ public class StreamTest {
 
         Integer[] intArray1 = {20, 50, 10, 40, 30};
         List<Integer> numbers1 = Arrays.asList(intArray1);
+
         Optional<Integer> result1 = numbers1.stream().collect(Collectors.minBy(new Comparator<Integer>() {
             @Override
             public int compare(Integer a, Integer b) {
@@ -269,6 +379,9 @@ public class StreamTest {
         /**
          *
          * Points to note:
+         *
+         * Arrays.stream(arr) can be used to stream through a primitive array.
+         *
          * average(), min(), max() returns optional values OptionalDouble(average), OptionalInt(max, min)
          * count() and sum() gives result in long(count) and int(sum)
          *

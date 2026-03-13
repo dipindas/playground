@@ -1,10 +1,10 @@
-package com.demo.playground.util.solid.openclose.good;
+package com.demo.playground.util.lowleveldesign.solid.openclose.good;
 
-public class CreditCard implements PaymentDetails {
+public class DebitCard implements PaymentDetails {
 
     private int cardNumber;
 
-    public CreditCard(int cardNumber) {
+    public DebitCard(int cardNumber) {
         this.cardNumber = cardNumber;
     }
 
@@ -18,6 +18,6 @@ public class CreditCard implements PaymentDetails {
 
     @Override
     public void pay() {
-        System.out.println("Payment through Credit card");
+        System.out.println("Payment through Debit card");
     }
 }

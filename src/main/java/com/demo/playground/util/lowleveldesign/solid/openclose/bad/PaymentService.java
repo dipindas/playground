@@ -1,4 +1,4 @@
-package com.demo.playground.util.solid.openclose;
+package com.demo.playground.util.lowleveldesign.solid.openclose.bad;
 
 public class PaymentService {
     public void makePayment(String paymentMethod) {

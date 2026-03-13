@@ -1,13 +1,9 @@
-package com.demo.playground.util;
+package com.demo.playground.util.stream;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
 
-public class StreamPractice {
+public class StreamPracticeAI {
 
     // Helper classes for practice questions
     static class Person {

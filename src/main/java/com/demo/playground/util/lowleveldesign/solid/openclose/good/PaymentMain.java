@@ -1,4 +1,4 @@
-package com.demo.playground.util.solid.openclose.good;
+package com.demo.playground.util.lowleveldesign.solid.openclose.good;
 
 public class PaymentMain {
     public static void main(String[] args) {
